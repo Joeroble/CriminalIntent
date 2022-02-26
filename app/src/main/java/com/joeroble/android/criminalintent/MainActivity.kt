@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         // and then call on supportFragmentManager to pass it the fragment and inflate it.
         if (currentFragment == null){
 
-            val fragment = CrimeFragment()
+            val fragment = CrimeListFragment.newInstance()
             supportFragmentManager
                 .beginTransaction()
                 .add(R.id.fragment_container, fragment)
