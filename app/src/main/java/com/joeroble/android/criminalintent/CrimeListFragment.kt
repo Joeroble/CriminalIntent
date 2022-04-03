@@ -1,6 +1,7 @@
 package com.joeroble.android.criminalintent
 
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -14,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 
 /**
@@ -26,6 +28,13 @@ import androidx.recyclerview.widget.RecyclerView
 private const val TAG = "CrimeListFragment"
 
 class CrimeListFragment : Fragment() {
+    //**
+    //* Required interface for hosting activities
+    interface Callbacks{
+        fun onCrimeSelected(crimeId: UUID)
+    }
+
+    private var callbacks: Callbacks? = null
 
     //This sets up the RecyclerView that will be initialized later, and sets up the crimeListViewModel
     // using lazy initialization.
@@ -34,6 +43,11 @@ class CrimeListFragment : Fragment() {
 
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
+    }
+
+    override fun onAttach(context: Context){
+        super.onAttach(context)
+        callbacks = context as Callbacks?
     }
 
 
@@ -71,6 +85,11 @@ class CrimeListFragment : Fragment() {
         )
     }
 
+    override fun onDetach(){
+        super.onDetach()
+        callbacks = null
+    }
+
     // The updateUI function pulls in the list of crimes from the crimeListViewModel, passes it
     // to the CrimeAdapter, which sorts out the data, and then passes it to the RecyclerView adapter.
     private fun updateUI(crimes: List<Crime>){
@@ -82,8 +101,8 @@ class CrimeListFragment : Fragment() {
     // views, and the solvedImageView that only appears on solved crimes.  This entire class
     // is for the display and binding of each crime in the RecyclerView.  In the bind, it sets up
     // the text for the title and date, and checks if the crime is solved, if it is it will display
-    // the image, if not it will not display the image.  It also has the early stage of the
-    // onClickListener, currently it just shows a toast that it was pressed.
+    // the image, if not it will not display the image.  onClick has been setup, and now crimes
+    // can be accessed.
     private inner class CrimeHolder(view: View):
         RecyclerView.ViewHolder(view), View.OnClickListener{
 
@@ -109,7 +128,7 @@ class CrimeListFragment : Fragment() {
         }
 
         override fun onClick(v: View){
-            Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show()
+            callbacks?.onCrimeSelected(crime.id)
         }
     }
 
